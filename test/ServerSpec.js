@@ -15,7 +15,7 @@ var Link = require('../app/models/link');
 /************************************************************/
 var xbeforeEach = function(){};
 /************************************************************/
-
+console.log("AAAAAA")
 
 describe('', function() {
 
@@ -40,10 +40,10 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
 
     // delete user Phillip from db so it can be created later for the test
@@ -52,22 +52,23 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
   });
 
   describe('Link creation:', function(){
-
+    console.log("BBBBBBBB")
     var requestWithSession = request.defaults({jar: true});
 
-    xbeforeEach(function(done){      // create a user that we can then log-in with
+    beforeEach(function(done){      // create a user that we can then log-in with
       new User({
           'username': 'Phillip',
           'password': 'Phillip'
       }).save().then(function(){
+        console.log("BBB-CCC");
         var options = {
           'method': 'POST',
           'followAllRedirects': true,
@@ -83,8 +84,9 @@ describe('', function() {
         });
       });
     });
-
+    console.log("CCCCCCCCC")
     it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
+      console.log("DDDDDDD")
       var options = {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/links',
