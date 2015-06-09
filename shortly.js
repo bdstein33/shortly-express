@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,7 +21,18 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({
+  secret: "purple monkeys"
+}));
 
+var checkUser = function(req, res, next) {
+  if(req.url !== '/login' && req.session.user === undefined) {
+    res.redirect('/login');
+  }
+  next();
+};
+
+app.all('*', checkUser);
 
 app.get('/',
 function(req, res) {
