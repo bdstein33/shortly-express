@@ -27,55 +27,91 @@ app.use(session({
 
 app.all('*', util.checkUser);
 
-app.get('/',
-function(req, res) {
+app.get('/', function(req, res) {
   res.render('index');
 });
 
-app.get('/create',
-function(req, res) {
+app.get('/create', function(req, res) {
   res.render('index');
 });
 
-app.get('/links',
-function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.send(200, links.models);
+app.get('/links', function(req, res) {
+  util.getUserId(req.session.user, function(id) {
+    Links.reset().query({where: {user_id: id}}).fetch().then(function(urls) {
+      res.send(200, urls.models);
+    });
   });
 });
 
-app.post('/links',
-function(req, res) {
+app.post('/links', function(req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
     return res.send(404);
   }
 
-  new Link({ url: uri }).fetch().then(function(found) {
-    if (found) {
-      res.send(200, found.attributes);
-    } else {
-      util.getUrlTitle(uri, function(err, title) {
-        if (err) {
-          console.log('Error reading URL heading: ', err);
-          return res.send(404);
-        }
+  util.getUserId(req.session.user, function(id) {
+    new Link({ url: uri, user_id: id}).fetch().then(function(found) {
+      if (found) {
+        res.send(200, found.attributes);
+      } else {
+        util.getUrlTitle(uri, function(err, title) {
+          if (err) {
+            console.log('Error reading URL heading: ', err);
+            return res.send(404);
+          }
 
-        var link = new Link({
-          url: uri,
-          title: title,
-          base_url: req.headers.origin
-        });
+          var link = new Link({
+            url: uri,
+            title: title,
+            base_url: req.headers.origin,
+            user_id: id
+          });
 
-        link.save().then(function(newLink) {
-          Links.add(newLink);
-          res.send(200, newLink);
+          link.save().then(function(newLink) {
+            Links.add(newLink);
+            res.send(200, newLink);
+          });
         });
-      });
-    }
-  });
+      }
+    });
+  })
 });
+
+// app.post('/links',
+// function(req, res) {
+//   var uri = req.body.url;
+
+//   if (!util.isValidUrl(uri)) {
+//     return res.send(404);
+//   }
+
+//   new User({ username: req.session.user }).urls({ url: uri }).fetch().then(function(urls) {
+//     console.log(urls);
+//     if (urls) {
+//       res.send(200, urls.attributes);
+//     } else {
+//       util.getUrlTitle(uri, function(err, title) {
+//         if (err) {
+//           console.log('Error reading URL heading: ', err);
+//           return res.send(404);
+//         }
+
+//         var link = new Link({
+//           url: uri,
+//           title: title,
+//           base_url: req.headers.origin
+//           // user_id: ???
+//         });
+
+//         link.save().then(function(newLink) {
+//           Links.add(newLink);
+//           res.send(200, newLink);
+//         });
+//       });
+//     }
+//   });
+// });
 
 /************************************************************/
 // Write your authentication routes here
@@ -95,7 +131,6 @@ app.post('/login', function(req, res) {
   .then(function(user) {
     if(user !== null) {
       util.checkPassword(req.body.password, user.get('password'), function(same) {
-        console.log(req.body.password);
         if (same) {
           req.session.user = user.get('username');
           res.redirect('/');
