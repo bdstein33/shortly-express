@@ -97,10 +97,6 @@ function(req, res) {
 /************************************************************/
 
 app.get('/login', function(req, res) {
-  var username = req.body.username;
-  var password = req.body.password;
-
-  // User.query('where')
   res.render('login');
 });
 
@@ -109,7 +105,16 @@ app.get('/signup', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-  res.send();
+  new User({username: req.body.username, password: req.body.password})
+  .fetch()
+  .then(function(user) {
+    if(user !== null) {
+      req.session.user = user.get('username');
+      res.redirect('/');
+    } else {
+      res.render('login')
+    }
+  });
 });
 
 app.post('/signup', function(req, res) {
