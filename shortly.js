@@ -112,7 +112,7 @@ app.post('/login', function(req, res) {
       req.session.user = user.get('username');
       res.redirect('/');
     } else {
-      res.render('login')
+      res.redirect('/login');
     }
   });
 });
@@ -130,9 +130,6 @@ app.post('/signup', function(req, res) {
 });
 
 app.get('/logout', function(req, res) {
-  console.log("LOG OUT RECEIVED");
-  console.log(req.session.user);
-  console.log(req.session);
   req.session.destroy(function(){
     res.redirect('/');
   });

@@ -61,7 +61,7 @@ describe('', function() {
       });
   });
 
-  xdescribe('Link creation:', function(){
+  describe('Link creation:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -240,7 +240,7 @@ describe('', function() {
 
   }); // 'Priviledged Access'
 
-  xdescribe('Account Creation:', function(){
+  describe('Account Creation:', function(){
 
     it('Signup creates a user record', function(done) {
       var options = {
@@ -312,7 +312,7 @@ describe('', function() {
       };
 
       requestWithSession(options, function(error, res, body) {
-        expect(res.headers.location).to.equal('/');
+        expect(res.headers.location).to.equal('index');
         done();
       });
     });
@@ -327,10 +327,18 @@ describe('', function() {
         }
       };
 
-      requestWithSession(options, function(error, res, body) {
-        expect(res.headers.location).to.equal('/login');
-        done();
+      var logout = {
+        'method': 'GET',
+        'uri': 'http://127.0.0.1:4568/logout'
+      }
+
+      requestWithSession(logout, function(error, res, body) {
+        requestWithSession(options, function(error, res, body) {
+          expect(res.headers.location).to.equal('/login');
+          done();
+        });
       });
+
     });
 
   }); // 'Account Login'
