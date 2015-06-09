@@ -3,6 +3,7 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var bcrypt = require('bcrypt-nodejs');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -26,8 +27,12 @@ app.use(session({
 }));
 
 var checkUser = function(req, res, next) {
-  if(req.url !== '/login' && req.session.user === undefined) {
+  if(req.url !== '/login' && req.url !== '/signup' && req.session.user === undefined) {
     res.redirect('/login');
+  }
+
+  else if((req.url === '/login' || req.url === '/signup') && req.session.user !== undefined) {
+    res.redirect('index');
   }
   next();
 };
@@ -93,10 +98,33 @@ app.get('/login', function(req, res) {
   res.render('login')
 });
 
-app.post('/login', function(req, res) {
+app.get('/signup', function(req, res) {
+  res.render('signup')
+});
 
+app.post('/login', function(req, res) {
   res.send();
 });
+
+app.post('/signup', function(req, res) {
+  new User({
+    'username': req.body.username,
+    'password': req.body.password
+  }).save().then(function(new_user) {
+    req.session.regenerate(function(){
+      req.session.user = new_user.get('username');
+      res.redirect('index');
+    });
+  });
+});
+
+app.get('/logout', function(req, res) {
+  console.log("LOG OUT RECEIVED");
+  req.session.destroy(function(){
+    res.redirect('/');
+  });
+});
+
 
 
 /************************************************************/
