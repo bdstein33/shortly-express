@@ -90,27 +90,40 @@ app.get('/signup', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-  new User({username: req.body.username, password: req.body.password})
+  new User({username: req.body.username})
   .fetch()
   .then(function(user) {
     if(user !== null) {
-      req.session.user = user.get('username');
-      res.redirect('/');
+      util.checkPassword(req.body.password, user.get('password'), function(same) {
+        console.log(req.body.password);
+        if (same) {
+          req.session.user = user.get('username');
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+        }
+      })
     } else {
       res.redirect('/login');
     }
+
   });
 });
 
 app.post('/signup', function(req, res) {
-  new User({
-    'username': req.body.username,
-    'password': req.body.password
-  }).save().then(function(new_user) {
-    req.session.regenerate(function(){
-      req.session.user = new_user.get('username');
-      res.redirect('/');
-    });
+  util.encryptPassword(req.body.password, function(encrypted_pw) {
+    new User({
+      'username': req.body.username,
+      'password': encrypted_pw
+    }).save().then(function(new_user) {
+      req.session.regenerate(function(){
+        req.session.user = new_user.get('username');
+        res.redirect('/');
+      });
+    }).catch(function(error) {
+        console.log(error);
+        res.redirect('/login');
+      });
   });
 });
 
