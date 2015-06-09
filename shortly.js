@@ -34,7 +34,10 @@ var checkUser = function(req, res, next) {
   else if((req.url === '/login' || req.url === '/signup') && req.session.user !== undefined) {
     res.redirect('index');
   }
-  next();
+  else {
+    next();
+  }
+
 };
 
 app.all('*', checkUser);
@@ -61,7 +64,6 @@ function(req, res) {
   var uri = req.body.url;
 
   if (!util.isValidUrl(uri)) {
-    console.log('Not a valid url: ', uri);
     return res.send(404);
   }
 
@@ -95,7 +97,11 @@ function(req, res) {
 /************************************************************/
 
 app.get('/login', function(req, res) {
-  res.render('login')
+  var username = req.body.username;
+  var password = req.body.password;
+
+  // User.query('where')
+  res.render('login');
 });
 
 app.get('/signup', function(req, res) {
@@ -113,13 +119,15 @@ app.post('/signup', function(req, res) {
   }).save().then(function(new_user) {
     req.session.regenerate(function(){
       req.session.user = new_user.get('username');
-      res.redirect('index');
+      res.redirect('/');
     });
   });
 });
 
 app.get('/logout', function(req, res) {
   console.log("LOG OUT RECEIVED");
+  console.log(req.session.user);
+  console.log(req.session);
   req.session.destroy(function(){
     res.redirect('/');
   });

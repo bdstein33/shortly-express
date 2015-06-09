@@ -3,8 +3,7 @@ window.Shortly = Backbone.View.extend({
 
   events: {
     'click li a.index':  'renderIndexView',
-    'click li a.create': 'renderCreateView',
-    'click li a.logout' : 'logout'
+    'click li a.create': 'renderCreateView'
   },
 
   initialize: function(){
@@ -39,7 +38,4 @@ window.Shortly = Backbone.View.extend({
       .addClass('selected');
   },
 
-  logout: function() {
-    this.router.navigate('/logout', { trigger: true });
-  }
 });
