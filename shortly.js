@@ -86,7 +86,7 @@ app.get('/login', function(req, res) {
 });
 
 app.get('/signup', function(req, res) {
-  res.render('signup')
+  res.render('signup', {error:''})
 });
 
 app.post('/login', function(req, res) {
@@ -121,8 +121,7 @@ app.post('/signup', function(req, res) {
         res.redirect('/');
       });
     }).catch(function(error) {
-        console.log(error);
-        res.redirect('/login');
+        res.render('signup', {error: "Username already exists"});
       });
   });
 });
