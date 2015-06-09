@@ -3,7 +3,6 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var bcrypt = require('bcrypt-nodejs');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -26,21 +25,7 @@ app.use(session({
   secret: "purple monkeys"
 }));
 
-var checkUser = function(req, res, next) {
-  if(req.url !== '/login' && req.url !== '/signup' && req.session.user === undefined) {
-    res.redirect('/login');
-  }
-
-  else if((req.url === '/login' || req.url === '/signup') && req.session.user !== undefined) {
-    res.redirect('index');
-  }
-  else {
-    next();
-  }
-
-};
-
-app.all('*', checkUser);
+app.all('*', util.checkUser);
 
 app.get('/',
 function(req, res) {
